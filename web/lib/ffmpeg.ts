@@ -53,7 +53,7 @@ export const exportTimelineToVideo = async (clips: TimelineClip[], onProgress?: 
     await ff.deleteFile(name);
   }
 
-  const blob = new Blob([(data as Uint8Array).buffer], { type: 'video/mp4' });
+  const blob = new Blob([data as Uint8Array], { type: 'video/mp4' });
   return URL.createObjectURL(blob);
 };
 
@@ -91,6 +91,6 @@ export const exportTimelineToWAV = async (clips: TimelineClip[], onProgress?: (p
     await ff.deleteFile(name);
   }
 
-  const blob = new Blob([(data as Uint8Array).buffer], { type: 'audio/wav' });
+  const blob = new Blob([data as Uint8Array], { type: 'audio/wav' });
   return URL.createObjectURL(blob);
 };
