@@ -11,8 +11,10 @@
   "dependencies": {
     "@ffmpeg/ffmpeg": "^0.12.10",
     "@ffmpeg/util": "^0.12.1",
+    "@supabase/supabase-js": "^2.45.0",
     "lucide-react": "^0.415.0",
     "next": "14.2.5",
+    "qrcode.react": "^4.0.1",
     "react": "^18",
     "react-dom": "^18",
     "zustand": "^5.0.14"
