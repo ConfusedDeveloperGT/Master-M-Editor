@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useSearchParams } from 'next/navigation';
 
-export default function MobileUploadPage() {
+function UploadContent() {
   const searchParams = useSearchParams();
   const sessionId = searchParams.get('session');
   
@@ -86,5 +86,13 @@ export default function MobileUploadPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function MobileUploadPage() {
+  return (
+    <Suspense fallback={<div className="upload-container">Loading...</div>}>
+      <UploadContent />
+    </Suspense>
   );
 }
