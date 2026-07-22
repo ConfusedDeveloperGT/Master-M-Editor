@@ -39,7 +39,7 @@ interface EditorState {
   selectedClipId: string | null;
   setSelectedClipId: (id: string | null) => void;
   addImportedMedia: (media: ImportedMedia) => void;
-  addTimelineClip: (clip: Omit<TimelineClip, 'id'>) => void;
+  addTimelineClip: (clip: TimelineClip) => void;
   updateTimelineClip: (id: string, updates: Partial<TimelineClip>) => void;
   removeTimelineClip: (id: string) => void;
   moveTimelineClip: (id: string, newTypeIndex: number) => void;
@@ -64,7 +64,7 @@ export const useEditorStore = create<EditorState>((set) => ({
   addTimelineClip: (clip) => set((state) => ({
     timelineClips: recalculateTimes([
       ...state.timelineClips,
-      { ...clip, id: crypto.randomUUID() }
+      clip
     ])
   })),
 
