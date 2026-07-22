@@ -2,38 +2,64 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editorStore';
+import { Settings, MonitorPlay } from 'lucide-react';
 
 export function PreviewPlayer() {
   const { timelineClips, currentTime, isPlaying, setCurrentTime, setIsPlaying } = useEditorStore();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const audioRef = useRef<HTMLAudioElement>(null);
   const requestRef = useRef<number>();
 
-  // Find the active clip for the current time
-  const activeClip = timelineClips.find(
-    (clip) => currentTime >= clip.start && currentTime < clip.end
+  const activeVideoClip = timelineClips.find(
+    (clip) => clip.type === 'video' && currentTime >= clip.start && currentTime < clip.end
+  );
+  
+  const activeAudioClip = timelineClips.find(
+    (clip) => clip.type === 'audio' && currentTime >= clip.start && currentTime < clip.end
   );
 
+  // Sync Video
   useEffect(() => {
     if (!videoRef.current) return;
-    
-    if (activeClip) {
-      const videoTime = (currentTime - activeClip.start) + activeClip.offset;
-      // Only seek if the difference is large enough to avoid stuttering
+    if (activeVideoClip) {
+      const videoTime = (currentTime - activeVideoClip.start) + activeVideoClip.offset;
       if (Math.abs(videoRef.current.currentTime - videoTime) > 0.1) {
         videoRef.current.currentTime = videoTime;
       }
     }
-  }, [currentTime, activeClip]);
+  }, [currentTime, activeVideoClip]);
 
+  // Sync Audio
   useEffect(() => {
-    if (isPlaying && activeClip && videoRef.current) {
-      videoRef.current.play().catch(() => {
-        // Handle autoplay restrictions or play errors
-      });
+    if (!audioRef.current) return;
+    if (activeAudioClip) {
+      const audioTime = (currentTime - activeAudioClip.start) + activeAudioClip.offset;
+      if (Math.abs(audioRef.current.currentTime - audioTime) > 0.1) {
+        audioRef.current.currentTime = audioTime;
+      }
+    }
+  }, [currentTime, activeAudioClip]);
+
+  // Play/Pause Video
+  useEffect(() => {
+    if (isPlaying && activeVideoClip && videoRef.current) {
+      videoRef.current.play().catch(() => {});
     } else if (videoRef.current) {
       videoRef.current.pause();
     }
-  }, [isPlaying, activeClip]);
+  }, [isPlaying, activeVideoClip]);
+
+  // Play/Pause Audio
+  useEffect(() => {
+    if (isPlaying && activeAudioClip && audioRef.current) {
+      audioRef.current.play().catch(() => {});
+    } else if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, [isPlaying, activeAudioClip]);
+
+  // Calculate the end time of the last clip
+  const maxTime = timelineClips.length > 0 ? Math.max(...timelineClips.map(c => c.end)) : 0;
 
   // Handle Playback loop
   useEffect(() => {
@@ -42,7 +68,14 @@ export function PreviewPlayer() {
     const updateTime = (time: number) => {
       if (isPlaying) {
         const delta = (time - lastTime) / 1000;
-        setCurrentTime(currentTime + delta);
+        let newTime = currentTime + delta;
+        
+        if (maxTime > 0 && newTime >= maxTime) {
+          newTime = maxTime;
+          setIsPlaying(false);
+        }
+        
+        setCurrentTime(newTime);
       }
       lastTime = time;
       if (isPlaying) {
@@ -59,34 +92,42 @@ export function PreviewPlayer() {
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [isPlaying, currentTime, setCurrentTime]);
-
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying);
-  };
+  }, [isPlaying, currentTime, setCurrentTime, maxTime, setIsPlaying]);
 
   return (
-    <section className="editor-preview">
-      <div className="video-player">
-        {activeClip ? (
+    <>
+      <div className="veed-player-wrapper">
+        {activeVideoClip ? (
           <video 
             ref={videoRef}
-            src={activeClip.sourceUrl}
+            src={activeVideoClip.sourceUrl}
             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-            muted // Muted for auto-play without restrictions during dev
+            muted
           />
         ) : (
-          <p style={{ color: '#94a3b8' }}>No media at this time</p>
+          <p style={{ color: '#4b5563' }}>No video at this time</p>
+        )}
+        {activeAudioClip && (
+          <audio ref={audioRef} src={activeAudioClip.sourceUrl} />
         )}
       </div>
-      <div className="player-controls">
-        <span style={{ color: '#e2e8f0', marginRight: '16px', fontFamily: 'monospace' }}>
-          {currentTime.toFixed(2)}s
-        </span>
-        <button className="control-btn" onClick={togglePlay}>
-          {isPlaying ? '⏸ Pause' : '▶ Play'}
-        </button>
+      
+      <div className="veed-canvas-settings">
+        <div className="setting-item">
+          <MonitorPlay size={16} />
+          <span>Wide Landscape (16:9)</span>
+        </div>
+        <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 8px' }} />
+        <div className="setting-item">
+          <div className="color-circle" style={{ background: '#000' }} />
+          <span>Background</span>
+        </div>
+        <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 8px' }} />
+        <div className="setting-item">
+          <Settings size={16} />
+          <span>Settings</span>
+        </div>
       </div>
-    </section>
+    </>
   );
 }

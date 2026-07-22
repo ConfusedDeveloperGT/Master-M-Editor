@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Button } from 'react-native';
 import { Camera, CameraView } from 'expo-camera';
 
 interface ScannerProps {
-  onScanSuccess: (sessionId: string) => void;
+  onScanSuccess?: (sessionId: string) => void;
 }
 
 export function Scanner({ onScanSuccess }: ScannerProps) {
@@ -21,18 +21,20 @@ export function Scanner({ onScanSuccess }: ScannerProps) {
 
   const handleBarCodeScanned = ({ type, data }: { type: string; data: string }) => {
     setScanned(true);
-    // Expecting URL like: http://localhost:3000/upload?session=1234
+    // Try to open the URL directly
     try {
-      const url = new URL(data);
-      const session = url.searchParams.get('session');
-      if (session) {
-        onScanSuccess(session);
+      if (data.startsWith('http://') || data.startsWith('https://')) {
+        import('expo-linking').then(Linking => {
+            Linking.openURL(data).catch((err) => {
+                alert('Could not open URL.');
+            });
+        });
       } else {
-        alert('Invalid QR Code. No session found.');
-        setTimeout(() => setScanned(false), 2000);
+        alert('Invalid QR Code. Not a URL.');
       }
+      setTimeout(() => setScanned(false), 2000);
     } catch (e) {
-      alert('Invalid QR Code format.');
+      alert('Error parsing QR code.');
       setTimeout(() => setScanned(false), 2000);
     }
   };
