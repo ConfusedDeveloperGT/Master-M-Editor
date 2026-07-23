@@ -7,7 +7,7 @@ import { Timeline } from '@/components/Timeline';
 import { PreviewPlayer } from '@/components/PreviewPlayer';
 import { useEditorStore } from '@/store/editorStore';
 import { exportTimelineToVideo, exportTimelineToWAV } from '@/lib/ffmpeg';
-import { Video, Music, Type, Captions, Settings, Download, Upload, Link, QrCode, Trash2, FileAudio, FileVideo, Undo2, Redo2 } from 'lucide-react';
+import { Video, Music, Type, Captions, Settings, Download, Upload, Link, QrCode, Trash2, FileAudio, FileVideo, Undo2, Redo2, Volume2, Maximize, RotateCw, PlaySquare, Layers, Image as ImageIcon, LayoutGrid } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('video');
@@ -21,7 +21,7 @@ export default function Home() {
   const videoFileRef = React.useRef<HTMLInputElement>(null);
   const audioFileRef = React.useRef<HTMLInputElement>(null);
   
-  const { importedMedia, addImportedMedia, timelineClips } = useEditorStore();
+  const { importedMedia, addImportedMedia, timelineClips, selectedClipId } = useEditorStore();
 
   const handleVideoImport = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -84,6 +84,8 @@ export default function Home() {
   const videoMedia = importedMedia.filter(m => m.type === 'video');
   const audioMedia = importedMedia.filter(m => m.type === 'audio');
 
+  const selectedClip = timelineClips.find(c => c.id === selectedClipId);
+
   const renderPanelContent = () => {
     switch (activeTab) {
       case 'video':
@@ -107,15 +109,15 @@ export default function Home() {
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Project Videos ({videoMedia.length})</span>
+                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Project Media</span>
               </div>
               
               <div className="veed-media-grid">
                 {videoMedia.length === 0 ? (
-                  <p style={{ fontSize: '0.75rem', color: '#9ca3af', gridColumn: '1 / -1', textAlign: 'center', padding: '24px 0' }}>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center', padding: '24px 0' }}>
                     No videos imported yet.
                     <br />
-                    <span style={{ fontSize: '0.65rem' }}>Upload or drag video files to start editing.</span>
+                    <span style={{ fontSize: '0.65rem' }}>Upload or drag video files here.</span>
                   </p>
                 ) : (
                   videoMedia.map((media, i) => (
@@ -150,15 +152,15 @@ export default function Home() {
 
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px' }}>
-                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Project Audio ({audioMedia.length})</span>
+                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>Audio Files</span>
               </div>
               
               <div className="veed-media-grid">
                 {audioMedia.length === 0 ? (
-                  <p style={{ fontSize: '0.75rem', color: '#9ca3af', gridColumn: '1 / -1', textAlign: 'center', padding: '24px 0' }}>
-                    No audio files imported yet.
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', gridColumn: '1 / -1', textAlign: 'center', padding: '24px 0' }}>
+                    No audio imported yet.
                     <br />
-                    <span style={{ fontSize: '0.65rem' }}>Upload .mp3, .wav, or .ogg files.</span>
+                    <span style={{ fontSize: '0.65rem' }}>Upload .mp3 or .wav</span>
                   </p>
                 ) : (
                   audioMedia.map((media, i) => (
@@ -168,7 +170,7 @@ export default function Home() {
                       draggable
                       onDragStart={(e) => handleDragStart(e, media)}
                     >
-                      <FileAudio size={28} color="#6b7280" />
+                      <FileAudio size={28} color="var(--text-muted)" />
                       <div className="media-item-badge"><Music size={12} /> Audio</div>
                     </div>
                   ))
@@ -181,54 +183,74 @@ export default function Home() {
       case 'subtitles':
         return (
           <>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.6 }}>
-              Auto-generate subtitles from your video or add them manually.
-            </p>
-            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '16px', gap: '10px' }} disabled>
-              <Captions size={18} /> Auto-Generate Subtitles
-            </button>
-            <p style={{ fontSize: '0.7rem', color: '#9ca3af', textAlign: 'center' }}>Coming soon — AI subtitle generation</p>
+            <div style={{ padding: '16px', background: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <h3 style={{ fontSize: '0.9rem', marginBottom: '8px' }}>Auto-Generate Subtitles</h3>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+                Automatically transcribe your video's audio using our AI model.
+              </p>
+              <button className="btn btn-green" style={{ width: '100%', justifyContent: 'center' }} disabled>
+                <Captions size={16} /> Generate Subtitles
+              </button>
+            </div>
+            
+            <div style={{ marginTop: '16px' }}>
+              <div className="action-grid">
+                <button className="btn btn-outline" disabled>Manual Subtitles</button>
+                <button className="btn btn-outline" disabled>Upload .SRT</button>
+              </div>
+            </div>
           </>
         );
 
       case 'text':
         return (
           <>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: 1.6 }}>
-              Add text overlays to your video.
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              Add text overlays to your video. Drag to the timeline.
             </p>
-            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '16px', gap: '10px' }} disabled>
-              <Type size={18} /> Add Title Text
-            </button>
-            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '16px', gap: '10px' }} disabled>
-              <Type size={14} /> Add Caption Text
-            </button>
-            <p style={{ fontSize: '0.7rem', color: '#9ca3af', textAlign: 'center' }}>Coming soon — Text overlay support</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '16px' }}>
+              <div className="veed-media-item" style={{ height: '60px', aspectRatio: 'auto', background: 'var(--bg-main)' }}>
+                <span style={{ fontSize: '1.2rem', fontWeight: 800 }}>Add a Heading</span>
+              </div>
+              <div className="veed-media-item" style={{ height: '50px', aspectRatio: 'auto', background: 'var(--bg-main)' }}>
+                <span style={{ fontSize: '1rem', fontWeight: 600 }}>Add a Subheading</span>
+              </div>
+              <div className="veed-media-item" style={{ height: '40px', aspectRatio: 'auto', background: 'var(--bg-main)' }}>
+                <span style={{ fontSize: '0.8rem' }}>Add a body text</span>
+              </div>
+            </div>
+          </>
+        );
+        
+      case 'elements':
+        return (
+          <>
+             <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+              Add shapes, stickers, and progress bars.
+            </p>
+            <div className="veed-media-grid" style={{ marginTop: '16px' }}>
+              <div className="veed-media-item" style={{ background: 'var(--bg-main)' }}>
+                <div style={{ width: '40px', height: '40px', background: '#3b82f6', borderRadius: '4px' }} />
+              </div>
+              <div className="veed-media-item" style={{ background: 'var(--bg-main)' }}>
+                <div style={{ width: '40px', height: '40px', background: '#ef4444', borderRadius: '50%' }} />
+              </div>
+            </div>
           </>
         );
 
       case 'settings':
         return (
           <>
-            <p style={{ fontSize: '0.875rem', color: '#6b7280', marginBottom: '16px' }}>
-              Export & project settings.
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+              Project Information.
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', gap: '10px' }} onClick={handleExportVideo} disabled={isExporting || timelineClips.length === 0}>
-                <FileVideo size={16} /> {isExporting ? 'Exporting...' : 'Export as MP4'}
-              </button>
-              <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'center', padding: '14px', gap: '10px' }} onClick={handleExportWAV} disabled={isExporting || timelineClips.length === 0}>
-                <FileAudio size={16} /> {isExporting ? 'Exporting...' : 'Export as WAV'}
-              </button>
-            </div>
-            <div style={{ marginTop: '16px', padding: '12px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#374151' }}>Project Info</span>
-              <p style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '4px' }}>
-                Clips on timeline: {timelineClips.length}
+            <div style={{ padding: '12px', background: 'var(--bg-main)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-main)' }}>Stats</span>
+              <p style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '8px', lineHeight: 1.8 }}>
+                Total Clips: {timelineClips.length}
                 <br />
-                Videos imported: {videoMedia.length}
-                <br />
-                Audio imported: {audioMedia.length}
+                Imported Media: {importedMedia.length}
               </p>
             </div>
           </>
@@ -241,10 +263,11 @@ export default function Home() {
 
   const tabLabel = () => {
     switch(activeTab) {
-      case 'video': return 'Video';
+      case 'video': return 'Media';
       case 'audio': return 'Audio';
       case 'subtitles': return 'Subtitles';
       case 'text': return 'Text';
+      case 'elements': return 'Elements';
       case 'settings': return 'Settings';
       default: return '';
     }
@@ -266,8 +289,8 @@ export default function Home() {
         <div className="veed-logo">M</div>
         
         <button className={`nav-item ${activeTab === 'video' ? 'active' : ''}`} onClick={() => handleTabClick('video')}>
-          <Video size={22} />
-          <span>Video</span>
+          <LayoutGrid size={22} />
+          <span>Media</span>
         </button>
         <button className={`nav-item ${activeTab === 'audio' ? 'active' : ''}`} onClick={() => handleTabClick('audio')}>
           <Music size={22} />
@@ -281,6 +304,10 @@ export default function Home() {
           <Type size={22} />
           <span>Text</span>
         </button>
+        <button className={`nav-item ${activeTab === 'elements' ? 'active' : ''}`} onClick={() => handleTabClick('elements')}>
+          <Layers size={22} />
+          <span>Elements</span>
+        </button>
         
         <div style={{ flex: 1 }} />
         <button className={`nav-item ${activeTab === 'settings' ? 'active' : ''}`} onClick={() => handleTabClick('settings')}>
@@ -288,7 +315,7 @@ export default function Home() {
         </button>
       </nav>
 
-      {/* 2. Contextual Panel */}
+      {/* 2. Contextual Panel (Left) */}
       <aside className={`veed-context-panel ${isMobilePanelOpen ? 'mobile-open' : ''}`}>
         <div className="panel-header">
           {tabLabel()}
@@ -304,9 +331,9 @@ export default function Home() {
         {/* Top Nav */}
         <header className="veed-top-nav">
           <div className="top-nav-left">
-            <Undo2 size={18} color="#9ca3af" style={{ cursor: 'pointer' }} />
-            <Redo2 size={18} color="#9ca3af" style={{ cursor: 'pointer' }} />
-            <div style={{ width: '1px', height: '20px', background: '#e5e7eb' }} />
+            <Undo2 size={18} color="var(--text-muted)" style={{ cursor: 'pointer' }} />
+            <Redo2 size={18} color="var(--text-muted)" style={{ cursor: 'pointer' }} />
+            <div style={{ width: '1px', height: '20px', background: 'var(--border-color)' }} />
             {isEditingName ? (
               <input
                 autoFocus
@@ -315,14 +342,14 @@ export default function Home() {
                 onBlur={() => setIsEditingName(false)}
                 onKeyDown={(e) => e.key === 'Enter' && setIsEditingName(false)}
                 style={{ 
-                  fontSize: '0.9rem', fontWeight: 600, border: '1px solid #3b82f6', 
+                  fontSize: '0.9rem', fontWeight: 600, border: '1px solid var(--accent-blue)', 
                   borderRadius: '6px', padding: '4px 8px', outline: 'none', width: '200px',
-                  color: '#111827', background: '#fff'
+                  color: 'var(--text-main)', background: 'var(--bg-main)'
                 }}
               />
             ) : (
               <span 
-                style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', color: '#374151' }}
+                style={{ fontWeight: 600, fontSize: '0.9rem', cursor: 'pointer', color: 'var(--text-main)' }}
                 onClick={() => setIsEditingName(true)}
                 title="Click to rename"
               >
@@ -361,6 +388,46 @@ export default function Home() {
         {/* Timeline */}
         <Timeline />
       </main>
+
+      {/* 4. Properties Panel (Right) */}
+      {selectedClip && (
+        <aside className="veed-properties-panel">
+          <div className="panel-header" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {selectedClip.type === 'video' ? <Video size={18} /> : <Music size={18} />}
+            <span style={{ fontSize: '1rem' }}>Clip Properties</span>
+          </div>
+          
+          <div className="prop-section">
+            <div className="prop-title">Transform</div>
+            <div className="prop-row">
+              <span className="prop-label"><Maximize size={14} style={{ marginRight: '8px', verticalAlign: 'middle' }}/>Scale</span>
+              <input type="range" min="0" max="200" defaultValue="100" className="prop-slider" />
+            </div>
+            <div className="prop-row">
+              <span className="prop-label"><RotateCw size={14} style={{ marginRight: '8px', verticalAlign: 'middle' }}/>Rotation</span>
+              <input type="range" min="0" max="360" defaultValue="0" className="prop-slider" />
+            </div>
+          </div>
+
+          <div className="prop-section">
+            <div className="prop-title">Audio</div>
+            <div className="prop-row">
+              <span className="prop-label"><Volume2 size={14} style={{ marginRight: '8px', verticalAlign: 'middle' }}/>Volume</span>
+              <input type="range" min="0" max="100" defaultValue="100" className="prop-slider" />
+            </div>
+          </div>
+
+          <div className="prop-section">
+            <div className="prop-title">AI Tools</div>
+            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start', marginBottom: '8px' }}>
+               ✨ Magic Cut
+            </button>
+            <button className="btn btn-outline" style={{ width: '100%', justifyContent: 'flex-start' }}>
+               👤 Remove Background
+            </button>
+          </div>
+        </aside>
+      )}
 
       <QRModal 
         isOpen={isQRModalOpen} 

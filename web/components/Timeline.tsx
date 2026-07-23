@@ -2,7 +2,7 @@
 
 import React, { DragEvent, useState, useEffect, useRef } from 'react';
 import { useEditorStore, TimelineClip } from '@/store/editorStore';
-import { Scissors, Play, Pause, FastForward, ZoomOut, ZoomIn, Maximize } from 'lucide-react';
+import { Scissors, Play, Pause, FastForward, ZoomOut, ZoomIn, Maximize, Type, Captions, Video, Music } from 'lucide-react';
 
 export function Timeline() {
   const { 
@@ -22,7 +22,6 @@ export function Timeline() {
     initialDuration: number;
   } | null>(null);
 
-  // Global mouse listeners for trimming
   useEffect(() => {
     if (!trimState) return;
 
@@ -37,7 +36,6 @@ export function Timeline() {
         let newOffset = trimState.initialOffset + deltaTime;
         let newDuration = trimState.initialDuration - deltaTime;
         
-        // Prevent negative duration or offset
         if (newDuration < 0.5) {
           newOffset = trimState.initialOffset + (trimState.initialDuration - 0.5);
           newDuration = 0.5;
@@ -67,7 +65,6 @@ export function Timeline() {
     };
   }, [trimState]);
 
-  // Keyboard shortcut for deleting selected clip
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.key === 'Backspace' || e.key === 'Delete') && selectedClipId) {
@@ -84,7 +81,7 @@ export function Timeline() {
     e.dataTransfer.dropEffect = 'copy';
   };
 
-  const handleDrop = (e: DragEvent<HTMLDivElement>, trackType: 'video' | 'audio') => {
+  const handleDrop = (e: DragEvent<HTMLDivElement>, trackType: 'video' | 'audio' | 'text' | 'subtitle') => {
     e.preventDefault();
     const dataStr = e.dataTransfer.getData('text/plain');
     if (!dataStr) return;
@@ -97,8 +94,9 @@ export function Timeline() {
     }
 
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
+    // Offset by track label width (80px)
+    const x = Math.max(0, e.clientX - rect.left - 80);
+    const percentage = x / (rect.width - 80);
     const dropTime = percentage * maxTime;
 
     const sameTypeClips = useEditorStore.getState().timelineClips.filter(c => c.type === trackType);
@@ -116,7 +114,16 @@ export function Timeline() {
       return;
     }
 
-    if (data.type !== trackType) return;
+    // Only allow media matching the track type for now
+    if (data.type !== trackType && trackType !== 'text' && trackType !== 'subtitle') return;
+
+    if (trackType === 'text' || trackType === 'subtitle') {
+       // Mock insertion for text/subtitles
+       const id = crypto.randomUUID();
+       addTimelineClip({ id, sourceUrl: '', type: trackType, start: 0, end: 5, duration: 5, offset: 0 });
+       useEditorStore.getState().moveTimelineClip(id, targetIndex);
+       return;
+    }
 
     const mediaElement = trackType === 'audio' ? document.createElement('audio') : document.createElement('video');
     mediaElement.src = data.url;
@@ -131,7 +138,7 @@ export function Timeline() {
 
   const handleClipDragStart = (e: React.DragEvent<HTMLDivElement>, clip: TimelineClip) => {
     if (trimState) {
-      e.preventDefault(); // Prevent standard drag if trimming
+      e.preventDefault();
       return;
     }
     e.dataTransfer.setData('text/plain', JSON.stringify({ type: 'timeline-clip', id: clip.id, trackType: clip.type }));
@@ -139,12 +146,12 @@ export function Timeline() {
   };
 
   const handleTimelineClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if ((e.target as HTMLElement).closest('.veed-clip')) return; // Ignore clicks on clips themselves for seeking
+    if ((e.target as HTMLElement).closest('.veed-clip') || (e.target as HTMLElement).closest('.veed-track-label')) return;
     
     setSelectedClipId(null);
     const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percentage = x / rect.width;
+    const x = Math.max(0, e.clientX - rect.left - 80);
+    const percentage = x / (rect.width - 80);
     setCurrentTime(percentage * maxTime);
   };
 
@@ -171,12 +178,10 @@ export function Timeline() {
         style={{
           left: `${(clip.start / maxTime) * 100}%`,
           width: `${(clip.duration / maxTime) * 100}%`,
-          border: isSelected ? '2px solid #3b82f6' : '1px solid rgba(0,0,0,0.1)',
-          boxShadow: isSelected ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'var(--shadow-sm)',
+          boxShadow: isSelected ? '0 0 0 2px var(--text-main)' : 'var(--shadow-sm)',
           zIndex: isSelected ? 10 : 1
         }}
       >
-        {/* Left Trim Handle */}
         <div 
           className="trim-handle trim-handle-left"
           onMouseDown={(e) => {
@@ -186,10 +191,9 @@ export function Timeline() {
         />
         
         <span style={{ flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', pointerEvents: 'none' }}>
-          {clip.type === 'video' ? 'Video Clip' : 'Audio Clip'}
+          {clip.type === 'video' ? 'Video.mp4' : clip.type === 'audio' ? 'Audio.wav' : clip.type === 'subtitle' ? 'Subtitles' : 'Text Layer'}
         </span>
         
-        {/* Right Trim Handle */}
         <div 
           className="trim-handle trim-handle-right"
           onMouseDown={(e) => {
@@ -207,7 +211,7 @@ export function Timeline() {
         <div className="timeline-controls">
           <button 
             className="btn btn-outline" 
-            style={{ border: 'none', padding: '4px 8px', opacity: selectedClipId ? 1 : 0.5 }}
+            style={{ padding: '6px 12px', opacity: selectedClipId ? 1 : 0.5, border: 'none' }}
             onClick={() => selectedClipId && splitTimelineClip(selectedClipId, currentTime)}
             disabled={!selectedClipId}
           >
@@ -217,8 +221,8 @@ export function Timeline() {
         
         <div className="playback-controls">
           <button className="btn-icon"><FastForward size={16} style={{ transform: 'rotate(180deg)' }} /></button>
-          <button className="btn-icon" onClick={togglePlay} style={{ color: 'var(--text-main)', background: 'var(--bg-hover)' }}>
-            {isPlaying ? <Pause size={20} /> : <Play size={20} />}
+          <button className="btn-icon" onClick={togglePlay} style={{ color: 'var(--bg-main)', background: 'var(--text-main)' }}>
+            {isPlaying ? <Pause size={20} /> : <Play size={20} style={{ marginLeft: '2px' }}/>}
           </button>
           <button className="btn-icon"><FastForward size={16} /></button>
           <span className="timecode">
@@ -229,7 +233,7 @@ export function Timeline() {
         <div className="timeline-controls">
           <button className="btn-icon"><ZoomOut size={16} /></button>
           <button className="btn-icon"><ZoomIn size={16} /></button>
-          <button className="btn-icon" style={{ display: 'flex', gap: '4px', fontSize: '0.75rem', alignItems: 'center' }}>
+          <button className="btn btn-outline" style={{ display: 'flex', gap: '4px', fontSize: '0.75rem', alignItems: 'center', border: 'none', padding: '4px 8px' }}>
             <Maximize size={14} /> Fit
           </button>
         </div>
@@ -241,36 +245,49 @@ export function Timeline() {
         <div 
           style={{
             position: 'absolute',
-            top: 16,
+            top: 0,
             bottom: 0,
-            left: `${(currentTime / maxTime) * 100}%`,
+            left: `calc(80px + ${(currentTime / maxTime) * 100}%)`,
             width: '2px',
-            backgroundColor: '#000',
+            backgroundColor: 'var(--accent-blue)',
             zIndex: 20,
             pointerEvents: 'none'
           }}
         >
           <div style={{
             position: 'absolute',
-            top: '-8px',
-            left: '-4px',
-            width: '10px',
-            height: '10px',
-            backgroundColor: '#000',
-            clipPath: 'polygon(0 0, 100% 0, 50% 100%)'
+            top: '0',
+            left: '-5px',
+            width: '12px',
+            height: '12px',
+            backgroundColor: 'var(--accent-blue)',
+            borderRadius: '2px 2px 50% 50%',
           }} />
         </div>
 
+        {/* Text Track */}
+        <div className="veed-track-container" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'text')}>
+          <div className="veed-track-label"><Type size={14} style={{ marginRight: '6px' }}/> Text</div>
+          <div className="veed-track veed-track-content">
+            {timelineClips.filter(c => c.type === 'text').map(renderClip)}
+          </div>
+        </div>
+
+        {/* Subtitles Track */}
+        <div className="veed-track-container" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'subtitle')}>
+          <div className="veed-track-label"><Captions size={14} style={{ marginRight: '6px' }}/> Subs</div>
+          <div className="veed-track veed-track-content">
+            {timelineClips.filter(c => c.type === 'subtitle').map(renderClip)}
+          </div>
+        </div>
+
         {/* Video Track */}
-        <div 
-          className="veed-track" 
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, 'video')}
-        >
-          <div className="veed-track-content">
+        <div className="veed-track-container" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'video')}>
+          <div className="veed-track-label"><Video size={14} style={{ marginRight: '6px' }}/> Video</div>
+          <div className="veed-track veed-track-content">
             {timelineClips.filter(c => c.type === 'video').length === 0 ? (
-              <div style={{ position: 'absolute', width: '100%', top: '16px', textAlign: 'center', fontSize: '0.75rem', color: '#9ca3af' }}>
-                + Add media to this project
+              <div style={{ position: 'absolute', width: '100%', top: '24px', textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Drag video media here
               </div>
             ) : (
               timelineClips.filter(c => c.type === 'video').map(renderClip)
@@ -279,12 +296,9 @@ export function Timeline() {
         </div>
 
         {/* Audio Track */}
-        <div 
-          className="veed-track" 
-          onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, 'audio')}
-        >
-          <div className="veed-track-content">
+        <div className="veed-track-container" onDragOver={handleDragOver} onDrop={(e) => handleDrop(e, 'audio')}>
+          <div className="veed-track-label"><Music size={14} style={{ marginRight: '6px' }}/> Audio</div>
+          <div className="veed-track veed-track-content">
             {timelineClips.filter(c => c.type === 'audio').map(renderClip)}
           </div>
         </div>

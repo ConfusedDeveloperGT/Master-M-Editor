@@ -1,22 +1,26 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  --bg-main: #f9fafb;
-  --bg-panel: #ffffff;
-  --bg-hover: #f3f4f6;
-  --text-main: #111827;
-  --text-muted: #6b7280;
-  --border-color: #e5e7eb;
+  /* Premium Dark Theme */
+  --bg-main: #0a0a0a;
+  --bg-panel: #171717;
+  --bg-hover: #262626;
+  --bg-active: #333333;
+  --text-main: #f9fafb;
+  --text-muted: #a1a1aa;
+  --border-color: #3f3f46;
+  --border-highlight: #52525b;
   
   --accent-green: #bef264;
   --accent-green-hover: #a3e635;
   --accent-yellow: #facc15;
   --accent-yellow-hover: #eab308;
   --accent-blue: #3b82f6;
+  --accent-purple: #8b5cf6;
   
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.6);
   
   --radius-sm: 6px;
   --radius-md: 8px;
@@ -39,11 +43,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #d1d5db;
+  background: var(--bg-hover);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #9ca3af;
+  background: var(--border-color);
 }
 
 body {
@@ -86,7 +90,7 @@ body {
   border-radius: var(--radius-md);
   color: var(--text-muted);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease-in-out;
   background: transparent;
   border: none;
 }
@@ -98,15 +102,18 @@ body {
 
 .nav-item.active {
   color: var(--text-main);
-  background-color: var(--bg-hover);
+  background-color: var(--bg-active);
   font-weight: 600;
+  border-left: 3px solid var(--accent-blue);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  width: 72px;
 }
 
 .nav-item span {
   font-size: 0.65rem;
 }
 
-/* Contextual Panel */
+/* Contextual Panel (Left) */
 .veed-context-panel {
   width: 320px;
   background-color: var(--bg-panel);
@@ -120,6 +127,7 @@ body {
   padding: 24px 24px 16px 24px;
   font-size: 1.25rem;
   font-weight: 700;
+  color: var(--text-main);
 }
 
 .panel-content {
@@ -129,6 +137,51 @@ body {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+/* Right Properties Panel */
+.veed-properties-panel {
+  width: 300px;
+  background-color: var(--bg-panel);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+
+.prop-section {
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.prop-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+  letter-spacing: 0.05em;
+}
+
+.prop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.prop-row:last-child {
+  margin-bottom: 0;
+}
+
+.prop-label {
+  font-size: 0.85rem;
+  color: var(--text-main);
+}
+
+.prop-slider {
+  flex: 1;
+  margin-left: 16px;
+  accent-color: var(--accent-blue);
 }
 
 /* Main Area */
@@ -154,33 +207,6 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  font-weight: 600;
-}
-
-.segmented-control {
-  display: flex;
-  background-color: var(--bg-hover);
-  padding: 4px;
-  border-radius: var(--radius-lg);
-  gap: 4px;
-}
-
-.segmented-btn {
-  padding: 6px 16px;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: var(--text-muted);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.segmented-btn.active {
-  background-color: var(--bg-panel);
-  color: var(--text-main);
-  box-shadow: var(--shadow-sm);
   font-weight: 600;
 }
 
@@ -210,26 +236,20 @@ body {
   border-radius: 50%;
   color: var(--text-muted);
   background: transparent;
+  border: none;
+  cursor: pointer;
 }
 .btn-icon:hover {
   background-color: var(--bg-hover);
   color: var(--text-main);
 }
 
-.btn-yellow {
-  background-color: var(--accent-yellow);
-  color: #854d0e;
-}
-.btn-yellow:hover {
-  background-color: var(--accent-yellow-hover);
-}
-
 .btn-green {
-  background-color: var(--accent-green);
-  color: #3f6212;
+  background-color: var(--text-main);
+  color: var(--bg-main);
 }
 .btn-green:hover {
-  background-color: var(--accent-green-hover);
+  background-color: var(--text-muted);
 }
 
 .btn-outline {
@@ -239,6 +259,7 @@ body {
 }
 .btn-outline:hover {
   background-color: var(--bg-hover);
+  border-color: var(--border-highlight);
 }
 
 /* Action Buttons Grid in Context Panel */
@@ -257,6 +278,9 @@ body {
   justify-content: center;
   padding: 32px;
   background-color: var(--bg-main);
+  background-image: 
+    radial-gradient(circle at 50% 50%, var(--bg-hover) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 .veed-player-wrapper {
@@ -265,7 +289,7 @@ body {
   max-width: 800px;
   aspect-ratio: 16 / 9;
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 0 0 1px var(--border-color), var(--shadow-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -277,11 +301,11 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-top: 16px;
+  margin-top: 24px;
   background-color: var(--bg-panel);
   padding: 8px 16px;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color);
   font-size: 0.875rem;
 }
@@ -292,8 +316,9 @@ body {
   gap: 8px;
   color: var(--text-main);
   cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  border-radius: var(--radius-md);
+  transition: background 0.2s;
 }
 .setting-item:hover {
   background-color: var(--bg-hover);
@@ -303,12 +328,12 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-highlight);
 }
 
 /* Timeline */
 .veed-timeline-area {
-  height: 250px;
+  height: 300px;
   background-color: var(--bg-panel);
   border-top: 1px solid var(--border-color);
   display: flex;
@@ -322,12 +347,13 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 16px;
+  background-color: var(--bg-panel);
 }
 
 .timeline-controls {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
 
 .playback-controls {
@@ -337,33 +363,52 @@ body {
 }
 
 .timecode {
-  font-family: monospace;
+  font-family: 'Inter', monospace;
+  font-variant-numeric: tabular-nums;
   font-size: 0.875rem;
   color: var(--text-muted);
+  margin-left: 8px;
 }
 
 .timeline-tracks {
   flex: 1;
   overflow-y: auto;
+  overflow-x: hidden;
   padding: 16px 0;
   position: relative;
+  background-color: var(--bg-main);
 }
 
 /* Veed Style Tracks */
-.veed-track {
-  height: 64px;
+.veed-track-container {
+  display: flex;
   margin-bottom: 4px;
   position: relative;
-  display: flex;
 }
 
 .veed-track-label {
-  width: 0; /* Hide label to mimic veed, it's just tracks */
-  display: none;
+  width: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-right: 1px solid var(--border-color);
+  background-color: var(--bg-panel);
+  z-index: 10;
+}
+
+.veed-track {
+  flex: 1;
+  height: 64px;
+  position: relative;
 }
 
 .veed-track-content {
-  flex: 1;
+  width: 100%;
+  height: 100%;
   position: relative;
   background-image: linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   background-size: 100px 100%;
@@ -376,28 +421,35 @@ body {
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  padding: 0 8px;
+  padding: 0 12px;
   font-size: 0.75rem;
   font-weight: 500;
   overflow: hidden;
   cursor: grab;
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.1);
   box-shadow: var(--shadow-sm);
+  color: #fff;
+  transition: transform 0.1s;
+}
+.veed-clip:active {
+  cursor: grabbing;
 }
 
+/* Gradient clips for premium feel */
 .veed-clip-video {
-  background-color: #f1f5f9; /* Slate 100 */
-  color: var(--text-main);
-  border-color: #cbd5e1;
-}
-.veed-clip-video:hover {
-  background-color: #e2e8f0;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .veed-clip-audio {
-  background-color: #ecfdf5; /* Emerald 50 */
-  color: #065f46;
-  border-color: #a7f3d0;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.veed-clip-text {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.veed-clip-subtitle {
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
 }
 
 /* Media Grid for Panel */
@@ -418,6 +470,7 @@ body {
   overflow: hidden;
   cursor: grab;
   position: relative;
+  transition: border-color 0.2s;
 }
 .veed-media-item:hover {
   border-color: var(--accent-blue);
@@ -437,15 +490,16 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: rgba(0, 0, 0, 0.4);
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
 }
 
 .modal-content {
   background: var(--bg-panel);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--border-highlight);
   padding: 32px;
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
   position: relative;
   width: 100%;
   max-width: 400px;
@@ -483,6 +537,8 @@ body {
   padding: 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  background: var(--bg-main);
+  color: var(--text-main);
   font-size: 1rem;
 }
 .file-input:focus {
@@ -496,6 +552,7 @@ body {
   align-items: center;
   padding: 16px;
   border: 1px solid var(--border-color);
+  background: #fff; /* QR needs white bg */
   border-radius: var(--radius-md);
   margin-bottom: 16px;
 }
@@ -538,15 +595,15 @@ body {
   position: absolute;
   bottom: 4px;
   left: 4px;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.7);
   color: white;
   font-size: 0.6rem;
   font-weight: 600;
-  padding: 2px 6px;
+  padding: 3px 6px;
   border-radius: 4px;
   display: flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
 }
 
 /* Logo */
@@ -555,14 +612,15 @@ body {
   font-size: 1.5rem;
   margin-bottom: 16px;
   color: var(--text-main);
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-  color: white;
-  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #facc15, #f59e0b);
+  color: #000;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 4px 10px rgba(250, 204, 21, 0.3);
 }
 
 /* Disabled button */
@@ -577,90 +635,37 @@ body {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 8px;
-  background-color: rgba(255, 255, 255, 0.8);
+  width: 10px;
+  background-color: rgba(255, 255, 255, 0.5);
   cursor: ew-resize;
   z-index: 5;
   opacity: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.2s, background-color 0.2s;
 }
 
 .veed-clip:hover .trim-handle {
   opacity: 1;
 }
+.trim-handle:hover {
+  background-color: rgba(255, 255, 255, 0.9);
+}
 
 .trim-handle-left {
   left: 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.2);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
 }
 
 .trim-handle-right {
   right: 0;
-  border-left: 1px solid rgba(0, 0, 0, 0.2);
+  border-left: 1px solid rgba(0, 0, 0, 0.3);
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 768px) {
-  .veed-layout {
-    flex-direction: column;
-  }
-  
-  .veed-sidebar-nav {
-    width: 100%;
-    height: 64px;
-    flex-direction: row;
-    justify-content: space-around;
-    padding: 0;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    z-index: 50;
-  }
-
-  .nav-item {
-    height: 100%;
-    width: auto;
-    flex: 1;
-  }
-
-  .veed-logo {
-    display: none;
-  }
-
-  .veed-main-area {
-    margin-bottom: 64px;
-  }
-
-  .veed-context-panel {
-    position: fixed;
-    bottom: 64px;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 60vh;
-    border-right: none;
-    border-top: 1px solid var(--border-color);
-    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
-    box-shadow: 0 -4px 15px rgba(0,0,0,0.1);
-    transform: translateY(120%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 40;
-  }
-
-  .veed-context-panel.mobile-open {
-    transform: translateY(0);
-  }
-
-  .veed-timeline-area {
-    flex: 1;
-    height: auto;
-    min-height: 200px;
-  }
-  
-  .veed-canvas-area {
-    padding: 16px;
-    flex: 0 0 auto;
-  }
+input[type=text] {
+  background: var(--bg-main);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+}
+input[type=text]:focus {
+  border-color: var(--accent-blue);
+  outline: none;
 }

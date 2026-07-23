@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef } from 'react';
 import { useEditorStore } from '@/store/editorStore';
-import { Settings, MonitorPlay } from 'lucide-react';
+import { Settings, MonitorPlay, Pipette } from 'lucide-react';
 
 export function PreviewPlayer() {
   const { timelineClips, currentTime, isPlaying, setCurrentTime, setIsPlaying } = useEditorStore();
@@ -105,7 +105,7 @@ export function PreviewPlayer() {
             muted
           />
         ) : (
-          <p style={{ color: '#4b5563' }}>No video at this time</p>
+          <p style={{ color: 'var(--text-muted)' }}>No video at this time</p>
         )}
         {activeAudioClip && (
           <audio ref={audioRef} src={activeAudioClip.sourceUrl} />
@@ -115,11 +115,11 @@ export function PreviewPlayer() {
       <div className="veed-canvas-settings">
         <div className="setting-item">
           <MonitorPlay size={16} />
-          <span>Wide Landscape (16:9)</span>
+          <span>Size: 16:9</span>
         </div>
         <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 8px' }} />
         <div className="setting-item">
-          <div className="color-circle" style={{ background: '#000' }} />
+          <Pipette size={16} />
           <span>Background</span>
         </div>
         <div style={{ width: '1px', height: '16px', background: 'var(--border-color)', margin: '0 8px' }} />
